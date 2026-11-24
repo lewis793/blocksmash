@@ -46,7 +46,7 @@ body[data-theme="ice"]{
 html,body{height:100%;color:var(--text);font-family:var(--font);background:#1b1b24;
   overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:none}
 body{background:var(--surface)}
-#app{height:100%;display:flex;flex-direction:column;align-items:center;gap:12px;
+#app{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
   max-width:520px;margin:0 auto;
   padding:calc(env(safe-area-inset-top) + 10px) 16px calc(env(safe-area-inset-bottom) + 14px)}
 
@@ -74,7 +74,7 @@ body{background:var(--surface)}
 
 /* ---------- Board: a toy-box tray with a plastic rim ---------- */
 #board{position:relative;display:grid;grid-template-columns:repeat(8,1fr);gap:var(--gap);padding:8px;
-  width:min(calc(100% - 12px),50vh);aspect-ratio:1;border-radius:18px;margin:6px 0 10px;background:var(--tray);
+  width:min(calc(100% - 12px),calc(100vh - 420px - env(safe-area-inset-top) - env(safe-area-inset-bottom)),calc(100dvh - 420px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));aspect-ratio:1;border-radius:18px;margin:6px 0 10px;background:var(--tray);
   box-shadow:0 0 0 6px var(--rim),0 10px 0 6px var(--rim-dk),0 20px 26px 6px rgba(0,0,0,.3),inset 0 6px 12px rgba(0,0,0,.5)}
 .c{position:relative;border-radius:14%;background:rgba(0,0,0,.22);
   box-shadow:inset 0 3px 4px rgba(0,0,0,.4),inset 0 -1px 0 rgba(255,255,255,.05)}
@@ -167,7 +167,7 @@ body[data-theme="ice"] :is(.f,.blk,.burst)::after{left:-10%;top:42%;width:120%;h
 @keyframes wobble{25%{transform:rotate(-5deg) scale(1.1)}50%{transform:rotate(4deg)}75%{transform:rotate(-2deg)}}
 
 /* ---------- Smash meter: ten sockets that fill with bricks ---------- */
-#smashbar{width:min(calc(100% - 12px),50vh);display:flex;align-items:center;gap:12px}
+#smashbar{width:min(calc(100% - 12px),calc(100vh - 420px - env(safe-area-inset-top) - env(safe-area-inset-bottom)),calc(100dvh - 420px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));display:flex;align-items:center;gap:12px}
 #meter{flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:4px;padding:5px;background:var(--tray);border-radius:12px;
   box-shadow:0 0 0 3px var(--rim),0 5px 0 3px var(--rim-dk)}
 .m{position:relative;aspect-ratio:1;border-radius:14%;background:rgba(0,0,0,.25);box-shadow:inset 0 2px 3px rgba(0,0,0,.4)}
@@ -179,11 +179,11 @@ body[data-theme="ice"] :is(.f,.blk,.burst)::after{left:-10%;top:42%;width:120%;h
 #smash.armed{color:#fff;background:var(--red);box-shadow:0 5px 0 var(--red-dk);animation:none}
 #smash:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
 @keyframes throb{from{transform:scale(1)}to{transform:scale(1.07)}}
-#hint{min-height:18px;font-size:14px;color:var(--yellow);font-weight:900;text-align:center;-webkit-text-stroke:4px var(--ink);paint-order:stroke fill}
+#hint{height:0;overflow:visible;position:relative;top:-4px;z-index:2;font-size:14px;color:var(--yellow);font-weight:900;text-align:center;-webkit-text-stroke:4px var(--ink);paint-order:stroke fill}
 
 /* ---------- Tray ---------- */
-#tray{width:100%;flex:1;min-height:110px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.slot{display:grid;place-items:center;position:relative}
+#tray{width:100%;flex:0 0 auto;height:min(22vh,160px);margin-top:4px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{display:grid;justify-items:center;align-items:start;padding-top:6px;position:relative}
 .piece{position:relative;filter:drop-shadow(0 5px 3px rgba(0,0,0,.3));transition:opacity .2s,transform .2s}
 .piece .blk{position:absolute}
 .slot.dead .piece{opacity:.35;filter:grayscale(.85)}
@@ -886,7 +886,7 @@ showHome();
 
 // ---------- Updates ----------
 // Bump VERSION and version.json together on every release.
-const VERSION = '2.0';
+const VERSION = '2.1';
 $('ver').textContent = 'v' + VERSION;
 // Wipes the offline copy (never your scores) and reloads the latest version
 async function forceUpdate(){
