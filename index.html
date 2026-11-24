@@ -23,7 +23,7 @@ html,body{height:100%;color:var(--text);font-family:var(--font);
   background:#0d0f22;
   overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:none}
 body{background:
-  radial-gradient(120% 70% at 50% -5%, #3a3f8f 0%, rgba(58,63,143,0) 60%),
+  radial-gradient(120% 70% at 50% -5%, var(--glow,#3a3f8f) 0%, transparent 60%),
   radial-gradient(90% 60% at 50% 110%, #2a1d5e 0%, rgba(42,29,94,0) 70%),
   linear-gradient(180deg,#1b1e45 0%,#12142f 60%,#0d0f22 100%)}
 #app{height:100%;display:flex;flex-direction:column;align-items:center;gap:12px;
@@ -70,6 +70,41 @@ body{background:
 @keyframes land{0%{transform:scale(1.18)}100%{transform:scale(1)}}
 #board.shake{animation:shake .38s}
 @keyframes shake{0%,100%{transform:translate(0)}20%{transform:translate(-7px,3px)}40%{transform:translate(7px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-1px)}}
+
+/* ---------- Block styles (one per game; switches on ALL CLEAR) ---------- */
+body[data-theme="gem"] :is(.f,.blk,.burst){border-radius:12%;
+  background:conic-gradient(from 45deg,color-mix(in srgb,var(--col) 80%,#fff) 0 25%,color-mix(in srgb,var(--col) 65%,#000) 25% 50%,var(--col) 50% 75%,color-mix(in srgb,var(--col) 50%,#fff) 75% 100%);
+  box-shadow:0 3px 4px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.25)}
+body[data-theme="gem"] :is(.f,.blk,.burst)::after{left:24%;top:24%;width:52%;height:52%;border-radius:8%;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--col) 40%,#fff),var(--col) 60%,color-mix(in srgb,var(--col) 80%,#000));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+
+body[data-theme="neon"] :is(.f,.blk,.burst){border-radius:18%;background:color-mix(in srgb,var(--col) 16%,#07071a);
+  box-shadow:inset 0 0 0 2px var(--col),inset 0 0 12px color-mix(in srgb,var(--col) 60%,transparent),0 0 10px color-mix(in srgb,var(--col) 55%,transparent)}
+body[data-theme="neon"] :is(.f,.blk,.burst)::after{left:26%;top:26%;width:48%;height:48%;border-radius:22%;background:none;
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--col) 55%,transparent)}
+
+body[data-theme="pastel"] :is(.f,.blk,.burst){border-radius:30%;background:var(--col);
+  box-shadow:inset 0 -4px 0 rgba(0,0,0,.1),inset 0 3px 0 rgba(255,255,255,.5),0 3px 4px rgba(0,0,0,.25)}
+body[data-theme="pastel"] :is(.f,.blk,.burst)::after{left:18%;top:16%;width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.7)}
+
+body[data-theme="jelly"] :is(.f,.blk,.burst){border-radius:36%;
+  background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--col) 40%,#fff) 0%,var(--col) 45%,color-mix(in srgb,var(--col) 65%,#000) 100%);
+  box-shadow:inset 0 -6px 8px rgba(0,0,0,.25),inset 0 4px 6px rgba(255,255,255,.35),0 4px 6px rgba(0,0,0,.35)}
+body[data-theme="jelly"] :is(.f,.blk,.burst)::after{left:20%;top:12%;width:34%;height:18%;border-radius:50%;background:rgba(255,255,255,.8);transform:rotate(-20deg)}
+
+body[data-theme="pixel"] :is(.f,.blk,.burst){border-radius:0;background:var(--col);
+  box-shadow:inset 3px 3px 0 color-mix(in srgb,var(--col) 50%,#fff),inset -3px -3px 0 color-mix(in srgb,var(--col) 60%,#000),0 0 0 1px rgba(0,0,0,.6)}
+body[data-theme="pixel"] :is(.f,.blk,.burst)::after{left:18%;top:18%;width:18%;height:18%;border-radius:0;background:rgba(255,255,255,.85)}
+body[data-theme="pixel"] .c{border-radius:3px}
+
+body[data-theme="ice"] :is(.f,.blk,.burst){border-radius:16%;overflow:hidden;
+  background:linear-gradient(135deg,rgba(255,255,255,.9) 0%,color-mix(in srgb,var(--col) 70%,transparent) 45%,color-mix(in srgb,var(--col) 85%,#1a3a6a) 100%);
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.75),inset 0 -3px 6px rgba(0,30,80,.3),0 3px 5px rgba(0,0,0,.35)}
+body[data-theme="ice"] :is(.f,.blk,.burst)::after{left:-10%;top:42%;width:120%;height:10%;border-radius:0;background:rgba(255,255,255,.45);transform:rotate(-45deg)}
+
+#board.restyle{animation:restyle .6s ease-out}
+@keyframes restyle{0%{filter:brightness(2.2) saturate(0)}100%{filter:none}}
 
 /* Effects layer */
 #fx{position:absolute;inset:0;pointer-events:none;z-index:3}
@@ -173,7 +208,7 @@ body{background:
 /* ---------- Home ---------- */
 #home{position:fixed;inset:0;z-index:15;display:none;place-items:center;overflow:hidden;
   background:
-    radial-gradient(120% 70% at 50% -5%, #3a3f8f 0%, rgba(58,63,143,0) 60%),
+    radial-gradient(120% 70% at 50% -5%, var(--glow,#3a3f8f) 0%, transparent 60%),
     radial-gradient(90% 60% at 50% 110%, #2a1d5e 0%, rgba(42,29,94,0) 70%),
     linear-gradient(180deg,#1b1e45 0%,#12142f 60%,#0d0f22 100%)}
 #home.show{display:grid}
@@ -266,7 +301,19 @@ body{background:
 <script>
 'use strict';
 const N = 8, SMASH_MAX = 10;
-const COLORS = ['#ff4d5e','#ffb81f','#2fd67b','#2f9bff','#8c5cff','#ff5fb8','#ff7a1a','#1fd1d6'];
+const THEMES = {
+  candy:  { name:'Candy',  glow:'#3a3f8f', colors:['#ff4d5e','#ffb81f','#2fd67b','#2f9bff','#8c5cff','#ff5fb8','#ff7a1a','#1fd1d6'] },
+  gem:    { name:'Gems',   glow:'#5a2a7a', colors:['#e0115f','#0f52ba','#10a35a','#9b30ff','#ffb300','#19c3c3','#ff4fa3','#d4c20a'] },
+  neon:   { name:'Neon',   glow:'#3a0a5a', colors:['#ff2bd6','#00f0ff','#39ff14','#ffe600','#ff6b00','#8a5cff','#ff3860','#00ff9c'] },
+  pastel: { name:'Pastel', glow:'#5a5a9a', colors:['#ffadad','#ffd6a5','#fdffb6','#caffbf','#9bf6ff','#a0c4ff','#bdb2ff','#ffc6ff'] },
+  jelly:  { name:'Jelly',  glow:'#2a6a8a', colors:['#ff3b6b','#ffb627','#3ddc84','#2ec4ff','#a66bff','#ff7bd5','#ff8c42','#4ee6d0'] },
+  pixel:  { name:'Pixel',  glow:'#2a3a5a', colors:['#e43b44','#f77622','#feae34','#63c74d','#0099db','#2ce8f5','#b55088','#8b9bb4'] },
+  ice:    { name:'Ice',    glow:'#2a5a8a', colors:['#bfe9ff','#8fd3ff','#5fb8ff','#a7f3f0','#d6c8ff','#7ee0ff','#cfe8ff','#9ad7e6'] },
+};
+const themeKey = () => (typeof S !== 'undefined' && S && THEMES[S.theme]) ? S.theme : 'candy';
+const themeColors = () => THEMES[themeKey()].colors;
+// A different style from the one you just had
+function nextTheme(cur){ const keys = Object.keys(THEMES).filter(k => k !== cur); return keys[Math.floor(rand()*keys.length)]; }
 
 // ---------- Pieces ----------
 // Base shapes ('#' = block, '|' = new row) with a weight. All rotations are generated.
@@ -297,7 +344,7 @@ function randomPiece(){
   let x = rand()*TOTAL_W, shape = SHAPES[0];
   for (const s of SHAPES){ if ((x -= s.w) < 0){ shape = s; break; } }
   const cells = pick(shape.orients);
-  return { cells, h: Math.max(...cells.map(p=>p[0]))+1, w: Math.max(...cells.map(p=>p[1]))+1, color: pick(COLORS) };
+  return { cells, h: Math.max(...cells.map(p=>p[0]))+1, w: Math.max(...cells.map(p=>p[1]))+1, color: pick(themeColors()) };
 }
 // Fair-hand rule: re-deal (randomly) until every piece fits somewhere on the board.
 // It never chooses pieces to help or hurt you. If no fair hand turns up, you get a random one.
@@ -312,7 +359,7 @@ function dealHand(){
 
 // ---------- State ----------
 let S;
-function fresh(){ return { grid: Array(N*N).fill(null), hand: null, score: 0, meter: 0, combo: 0, since: 0, over: false, startBest: best, nb: false }; }
+function fresh(){ return { grid: Array(N*N).fill(null), hand: null, score: 0, meter: 0, combo: 0, since: 0, over: false, startBest: best, nb: false, theme: nextTheme(store.get('bs-theme')) }; }
 const store = {
   get(k){ try { return localStorage.getItem(k); } catch { return null; } },
   set(k,v){ try { localStorage.setItem(k,v); } catch {} },
@@ -374,7 +421,19 @@ function animateScore(){
 }
 
 let lastHandKey = '';
+let appliedTheme = null;
+function applyTheme(){
+  const t = themeKey();
+  if (t === appliedTheme) return;
+  const first = appliedTheme === null; appliedTheme = t;
+  document.body.dataset.theme = t;
+  document.body.style.setProperty('--glow', THEMES[t].glow);
+  store.set('bs-theme', t);
+  document.querySelectorAll('#rain .blk').forEach(b => b.style.setProperty('--col', pick(THEMES[t].colors)));
+  if (!first){ boardEl.classList.remove('restyle'); void boardEl.offsetWidth; boardEl.classList.add('restyle'); }
+}
 function render(){
+  applyTheme();
   S.grid.forEach((col,i)=>{
     const el=cellEls[i];
     el.className = col ? 'c f' : 'c';
@@ -455,7 +514,12 @@ function place(i, r, c){
     S.meter = Math.min(SMASH_MAX, S.meter + lines);
     cells.forEach(idx => { cleared.push([idx, S.grid[idx]]); S.grid[idx] = null; });
     const allClear = S.grid.every(x => !x);
-    if (allClear) pts += 300;
+    if (allClear){
+      pts += 300;
+      // Clearing the board earns a new block style; pieces still in hand switch over too
+      S.theme = nextTheme(S.theme);
+      S.hand.forEach(h => { if (h) h.color = pick(themeColors()); });
+    }
     S.score += pts;
 
     const WORDS = [[], ['GOOD!','NICE!','SWEET!'], ['GREAT!','DOUBLE!'], ['AMAZING!','TRIPLE!'], ['INCREDIBLE!','UNREAL!','QUAD!']];
@@ -465,7 +529,8 @@ function place(i, r, c){
 
     let wait = 1100;
     if (!wasReady && S.meter >= SMASH_MAX){ laterToast(wait, 'SMASH READY!', '', '', 2); wait += 1100; }
-    if (!S.nb && S.startBest > 0 && S.score > S.startBest){ S.nb = true; laterToast(wait, 'NEW BEST!', '', '', 5); }
+    if (!S.nb && S.startBest > 0 && S.score > S.startBest){ S.nb = true; laterToast(wait, 'NEW BEST!', '', '', 5); wait += 1100; }
+    if (allClear) laterToast(wait, THEMES[S.theme].name.toUpperCase(), 'new style', '', 4);
     if (lines >= 2 || S.combo >= 3 || allClear) shake();
     buzz(lines >= 2 ? [30,40,30] : 25);
   } else if (++S.since >= 3){ S.combo = 0; }
@@ -538,7 +603,9 @@ function smashAt(r0, c0){
 }
 
 function newGame(){
+  clearToasts();
   S = fresh(); S.hand = dealHand(); smashArmed=false; shownScore = 0;
+  laterToast(450, THEMES[S.theme].name.toUpperCase(), 'new style', '', 1);
   save(); hint(''); render(); hideOv();
 }
 
@@ -571,7 +638,7 @@ document.querySelectorAll('.title .word').forEach((w, wi) => {
 for (let i=0;i<16;i++){
   const b = document.createElement('div'), s = 22 + rand()*40;
   b.className = 'blk';
-  b.style.cssText = `--col:${pick(COLORS)};--r:${Math.round(rand()*540-270)}deg;width:${s}px;height:${s}px;` +
+  b.style.cssText = `--col:${pick(themeColors())};--r:${Math.round(rand()*540-270)}deg;width:${s}px;height:${s}px;` +
     `left:${rand()*100}%;animation-duration:${7+rand()*9}s;animation-delay:${-rand()*16}s`;
   $('rain').appendChild(b);
 }
@@ -714,7 +781,7 @@ showHome();
 
 // ---------- Updates ----------
 // Bump VERSION and version.json together on every release.
-const VERSION = '1.4';
+const VERSION = '1.5';
 $('ver').textContent = 'v' + VERSION;
 // Wipes the offline copy (never your scores) and reloads the latest version
 async function forceUpdate(){
