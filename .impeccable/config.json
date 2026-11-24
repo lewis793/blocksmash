@@ -26,6 +26,15 @@
         "value": "cubic-bezier(.3, 1.8, .5, 1)",
         "createdAt": "2026-11-24T21:15:38.479Z",
         "reason": "Claude: casual arcade puzzle game; user asked for juicy Block-Blast-level game feel, overshoot is the genre's convention"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-24T21:27:19.128Z",
+        "reason": "Claude: the Neon block style the user asked for (different block styles per game) is glowing outlines by definition"
       }
     ]
   }
