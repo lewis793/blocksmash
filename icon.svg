@@ -1,9 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#12131f"/>
-  <g transform="translate(116 116)">
-    <rect x="0" y="0" width="128" height="128" rx="22" fill="#ffb020"/>
-    <rect x="152" y="0" width="128" height="128" rx="22" fill="#3aa8ff"/>
-    <rect x="0" y="152" width="128" height="128" rx="22" fill="#2ed3a0"/>
-    <rect x="152" y="152" width="128" height="128" rx="22" fill="#ff5d5d"/>
+  <rect width="512" height="512" rx="96" fill="#22304f"/>
+  <g id="b">
+    <rect x="95" y="111" width="150" height="150" rx="22" fill="#9c1a20"/>
+    <rect x="95" y="101" width="150" height="146" rx="22" fill="#e3262f"/>
+    <circle cx="170" cy="177" r="36" fill="#9c1a20"/>
+    <circle cx="170" cy="168" r="36" fill="#e3262f"/>
+    <path d="M146 160a26 26 0 0 1 30-17" stroke="#fff" stroke-opacity=".45" stroke-width="7" fill="none" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(172 0)">
+    <rect x="95" y="111" width="150" height="150" rx="22" fill="#b38f00"/>
+    <rect x="95" y="101" width="150" height="146" rx="22" fill="#ffcd03"/>
+    <circle cx="170" cy="177" r="36" fill="#b38f00"/>
+    <circle cx="170" cy="168" r="36" fill="#ffcd03"/>
+    <path d="M146 160a26 26 0 0 1 30-17" stroke="#fff" stroke-opacity=".45" stroke-width="7" fill="none" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(0 172)">
+    <rect x="95" y="111" width="150" height="150" rx="22" fill="#134a94"/>
+    <rect x="95" y="101" width="150" height="146" rx="22" fill="#1e6fd9"/>
+    <circle cx="170" cy="177" r="36" fill="#134a94"/>
+    <circle cx="170" cy="168" r="36" fill="#1e6fd9"/>
+    <path d="M146 160a26 26 0 0 1 30-17" stroke="#fff" stroke-opacity=".45" stroke-width="7" fill="none" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(172 172)">
+    <rect x="95" y="111" width="150" height="150" rx="22" fill="#1b7a31"/>
+    <rect x="95" y="101" width="150" height="146" rx="22" fill="#2bb34a"/>
+    <circle cx="170" cy="177" r="36" fill="#1b7a31"/>
+    <circle cx="170" cy="168" r="36" fill="#2bb34a"/>
+    <path d="M146 160a26 26 0 0 1 30-17" stroke="#fff" stroke-opacity=".45" stroke-width="7" fill="none" stroke-linecap="round"/>
   </g>
 </svg>
