@@ -718,10 +718,14 @@ boardEl.addEventListener('pointerup', e => {
 });
 
 // ---------- Dragging ----------
-let drag = null;
-const LIFT = 70; // piece floats above your finger so you can see it
+let drag = null, busy = false;
+const LIFT = 60;     // piece floats above your finger so you can see it
+const SPEED = 1.4;   // piece travels faster than your finger, so short flicks reach the whole board
+const SNAP = 0.8;    // how far (in cells) a drop can be from a fitting spot and still snap into it
+const setFloat = (x, y, k) => { floatEl.style.transform = `translate3d(${x}px,${y}px,0) scale(${k})`; };
+
 trayEl.addEventListener('pointerdown', e => {
-  if (smashArmed || S.over) return;
+  if (smashArmed || S.over || busy || drag) return;
   const slot = e.target.closest('.slot'); if (!slot) return;
   const i = +slot.dataset.i, p = S.hand[i]; if (!p) return;
   const g = boardGeom(), gap = g.pitch - g.size;
@@ -732,36 +736,77 @@ trayEl.addEventListener('pointerdown', e => {
     floatEl.appendChild(b);
   }
   const w = p.w*g.pitch - gap, h = p.h*g.pitch - gap;
-  drag = { i, p, g, w, h, r:null, c:null, id:e.pointerId };
+  const pieceEl = slot.querySelector('.piece'), pr = pieceEl.getBoundingClientRect();
+  drag = {
+    i, p, g, w, h, slot, id: e.pointerId,
+    x0: e.clientX, y0: e.clientY,                       // where your finger went down
+    ox: e.clientX - w/2, oy: e.clientY - h - LIFT,      // where the piece starts (just above your finger)
+    home: { x: pr.left + pr.width/2 - w/2, y: pr.top + pr.height/2 - h/2, k: pr.width / w },
+    x: e.clientX, y: e.clientY, k: pr.width / w, t0: performance.now(), key: null, r: null, c: null, raf: 0,
+  };
   slot.classList.remove('new');
   slot.classList.add('lifted');
+  floatEl.style.transition = 'none';
+  floatEl.style.transformOrigin = '50% 50%';
   floatEl.style.display = 'block';
   trayEl.setPointerCapture(e.pointerId);
-  moveDrag(e.clientX, e.clientY);
+  frame();
 });
-trayEl.addEventListener('pointermove', e => { if (drag && e.pointerId===drag.id) moveDrag(e.clientX, e.clientY); });
+trayEl.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  drag.x = e.clientX; drag.y = e.clientY;
+  if (!drag.raf) drag.raf = requestAnimationFrame(frame);
+});
 trayEl.addEventListener('pointerup', e => { if (drag && e.pointerId===drag.id) endDrag(); });
-trayEl.addEventListener('pointercancel', () => { if (drag) { drag.r=null; endDrag(); } });
+trayEl.addEventListener('pointercancel', () => { if (drag) { drag.r = null; endDrag(); } });
 
-function moveDrag(x, y){
-  const {g, w, h, p} = drag;
-  const left = x - w/2, top = y - h - LIFT;
-  floatEl.style.transform = `translate(${left}px,${top}px)`;
-  const c = Math.round((left - g.x)/g.pitch), r = Math.round((top - g.y)/g.pitch);
-  if (r===drag.r && c===drag.c) return;
+// One update per screen frame, however many touch events arrive
+function frame(){
+  if (!drag) return;
+  drag.raf = 0;
+  const {g, p} = drag;
+  const left = drag.ox + (drag.x - drag.x0) * SPEED;
+  const top  = drag.oy + (drag.y - drag.y0) * SPEED;
+  // Grow from tray size to board size over the first moment of the pick-up
+  const t = Math.min(1, (performance.now() - drag.t0) / 110), ease = 1 - Math.pow(1 - t, 3);
+  setFloat(left, top, drag.home.k + (1 - drag.home.k) * ease);
+  if (t < 1) drag.raf = requestAnimationFrame(frame);
+
+  // Nearest spot the piece fits, within SNAP cells
+  const fr = (top - g.y) / g.pitch, fc = (left - g.x) / g.pitch;
+  let spot = null, bestD = SNAP * SNAP;
+  for (const r of [Math.floor(fr), Math.ceil(fr)]) for (const c of [Math.floor(fc), Math.ceil(fc)]){
+    const d = (r - fr) ** 2 + (c - fc) ** 2;
+    if (d <= bestD && canPlace(p, r, c)){ bestD = d; spot = [r, c]; }
+  }
+  const key = spot ? spot[0] * 16 + spot[1] : null;
+  if (key === drag.key) return;
+  drag.key = key;
   clearMarks();
-  if (canPlace(p, r, c)){
-    drag.r=r; drag.c=c;
+  if (spot){
+    const [r, c] = spot; drag.r = r; drag.c = c;
     for (const [dr,dc] of p.cells){ const el=cellEls[(r+dr)*N+c+dc]; el.classList.add('ghost'); el.style.setProperty('--col', p.color); }
-    const {cells} = linesAfter(p, r, c);
-    cells.forEach(idx => cellEls[idx].classList.add('will'));
-  } else { drag.r=null; drag.c=null; }
+    linesAfter(p, r, c).cells.forEach(idx => cellEls[idx].classList.add('will'));
+    buzz(4);
+  } else { drag.r = null; drag.c = null; }
 }
+
 function endDrag(){
-  const {i, r, c} = drag;
-  drag = null; floatEl.style.display='none'; clearMarks();
-  if (r !== null && r !== undefined) place(i, r, c);
-  else render();
+  const d = drag; drag = null;
+  cancelAnimationFrame(d.raf);
+  clearMarks();
+  busy = true;
+  floatEl.style.transition = 'transform .09s ease-out';
+  if (d.r !== null){
+    // Glide into the slot, then land
+    setFloat(d.g.x + d.c * d.g.pitch, d.g.y + d.r * d.g.pitch, 1);
+    setTimeout(() => { floatEl.style.display = 'none'; busy = false; place(d.i, d.r, d.c); }, 90);
+  } else {
+    // Doesn't fit: slide back to the tray
+    floatEl.style.transition = 'transform .16s ease-out';
+    setFloat(d.home.x, d.home.y, d.home.k);
+    setTimeout(() => { floatEl.style.display = 'none'; busy = false; render(); }, 160);
+  }
 }
 
 window.addEventListener('resize', () => S && renderTray());
@@ -781,7 +826,7 @@ showHome();
 
 // ---------- Updates ----------
 // Bump VERSION and version.json together on every release.
-const VERSION = '1.5';
+const VERSION = '1.6';
 $('ver').textContent = 'v' + VERSION;
 // Wipes the offline copy (never your scores) and reloads the latest version
 async function forceUpdate(){
