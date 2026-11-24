@@ -1,0 +1,32 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(.3, 1.4, .5, 1)",
+        "createdAt": "2026-11-24T21:15:36.801Z",
+        "reason": "Claude: casual arcade puzzle game; user asked for juicy Block-Blast-level game feel, overshoot is the genre's convention"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(.3, 1.5, .5, 1)",
+        "createdAt": "2026-11-24T21:15:37.370Z",
+        "reason": "Claude: casual arcade puzzle game; user asked for juicy Block-Blast-level game feel, overshoot is the genre's convention"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(.3, 1.6, .5, 1)",
+        "createdAt": "2026-11-24T21:15:37.922Z",
+        "reason": "Claude: casual arcade puzzle game; user asked for juicy Block-Blast-level game feel, overshoot is the genre's convention"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(.3, 1.8, .5, 1)",
+        "createdAt": "2026-11-24T21:15:38.479Z",
+        "reason": "Claude: casual arcade puzzle game; user asked for juicy Block-Blast-level game feel, overshoot is the genre's convention"
+      }
+    ]
+  }
+}
