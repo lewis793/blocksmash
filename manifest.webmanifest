@@ -1,6 +1,6 @@
 {
-  "name": "blocksmash",
-  "short_name": "blocksmash",
+  "name": "Block Smash",
+  "short_name": "Block Smash",
   "description": "A block puzzle with an honest dealer. No ads, works offline.",
   "start_url": "./",
   "scope": "./",
