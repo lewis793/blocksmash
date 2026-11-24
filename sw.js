@@ -1,5 +1,5 @@
 // Works offline: the page is fetched fresh when online (so updates arrive) and served from cache when not.
-const CACHE = 'blocksmash-v4';
+const CACHE = 'blocksmash-v5';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -13,6 +13,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  if (new URL(req.url).pathname.endsWith('version.json')) return; // always ask the server
   const keep = res => { if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } return res; };
   if (req.mode === 'navigate') {
     // Network first for the page, cache when offline

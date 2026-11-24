@@ -257,6 +257,8 @@ body{background:
       <button class="linkbtn" id="howBtn">How to play</button>
     </div>
     <p class="tag">No ads. No revives. Just you.</p>
+    <button class="linkbtn" id="updBtn" style="display:none">Update available — tap to update</button>
+    <p class="tag" id="ver" style="font-size:12px;opacity:.7"></p>
   </div>
 </div>
 <div id="ov"><div class="card" id="card"></div></div>
@@ -710,9 +712,37 @@ if (S.over){ S = fresh(); S.hand = dealHand(); shownScore = 0; save(); render();
 hideOv();
 showHome();
 
-if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+// ---------- Updates ----------
+// Bump VERSION and version.json together on every release.
+const VERSION = '1.4';
+$('ver').textContent = 'v' + VERSION;
+// Wipes the offline copy (never your scores) and reloads the latest version
+async function forceUpdate(){
+  $('updBtn').textContent = 'Updating…';
+  try {
+    for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+    for (const k of await caches.keys()) await caches.delete(k);
+  } catch {}
+  location.replace('./?v=' + Date.now());
 }
+$('updBtn').onclick = forceUpdate;
+// Asks the server which version is live; offline just means no check
+async function checkForUpdate(){
+  try {
+    const res = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    const live = (await res.json()).version;
+    if (live && live !== VERSION) $('updBtn').style.display = '';
+  } catch {}
+}
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+    // Home-screen apps resume instead of relaunching, so check again whenever the app comes back
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible'){ reg.update().catch(()=>{}); checkForUpdate(); }
+    });
+  }).catch(()=>{});
+}
+checkForUpdate();
 </script>
 </body>
 </html>
