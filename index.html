@@ -290,6 +290,13 @@ body[data-theme="ice"] :is(.f,.blk,.burst)::after{left:-10%;top:42%;width:120%;h
 .set.off{opacity:.35}
 body.puzzle #score,body.puzzle #comboPill,body.puzzle #smashbar{display:none}
 body.puzzle .bestpill{visibility:hidden}
+#pzbar{display:none;gap:10px;margin-top:2px}
+body.puzzle:not(.demo) #pzbar{display:flex}
+.hintcell{background:var(--col);animation:hintpulse .7s infinite alternate ease-in-out}
+@keyframes hintpulse{from{opacity:.25}to{opacity:.7}}
+.slot.hinted .piece{animation:hintbob .5s infinite alternate ease-in-out}
+@keyframes hintbob{to{transform:translateY(-7px) scale(1.08)}}
+body.demo #restartBtn{visibility:hidden}
 body.puzzle #tray{grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;height:min(30vh,230px);row-gap:4px}
 body.puzzle .slot{padding-top:2px}
 .card .sub{font:600 13px var(--body);color:var(--muted);margin-top:4px}
@@ -317,6 +324,7 @@ body.puzzle .slot{padding-top:2px}
     <button id="smash"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="14" r="7" fill="currentColor"/><circle cx="8" cy="11.5" r="2" fill="rgba(255,255,255,.5)"/><path d="M15 8.5l2.5-2.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M19 2.5l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6z" fill="#ff4d6d"/></svg><span id="smashLabel">SMASH</span></button>
   </div>
   <div id="hint"></div>
+  <div id="pzbar"><button class="linkbtn" id="hintBtn">Hint</button><button class="linkbtn" id="giveUpBtn">Give up</button></div>
 
   <div id="tray"></div>
 </div>
@@ -446,6 +454,7 @@ const store = {
 let best = +store.get('bs-best') || 0;
 function loadBest(){ best = +store.get(bestKey(modeOf())) || 0; }
 function save(){
+  if (S && S.demo) return;   // the solution demo is never saved
   store.set(saveKey(modeOf()), JSON.stringify(S));
   if (S.score > best){ best = S.score; store.set(bestKey(modeOf()), best); }
 }
@@ -511,6 +520,60 @@ function makePuzzle(day, theme){
   return null;
 }
 
+// Finds a sequence of moves that clears the board from the current position (or null if there isn't one).
+// Depth-first search over the remaining pieces, skipping duplicate pieces and positions already seen.
+function solvePuzzle(grid, hand, limit = 200000, clearingOnly = false){
+  const start = grid.map(v => v ? 1 : 0);
+  const seen = new Set();
+  let nodes = 0;
+  const fits = (g, p, r, c) => p.cells.every(([dr, dc]) => !g[(r+dr)*N + c+dc]);
+  function drop(g, p, r, c){
+    const ng = g.slice(); let cleared = false;
+    for (const [dr, dc] of p.cells) ng[(r+dr)*N + c+dc] = 1;
+    const rows = [], cols = [];
+    for (let i = 0; i < N; i++){
+      let row = true, col = true;
+      for (let j = 0; j < N; j++){ if (!ng[i*N+j]) row = false; if (!ng[j*N+i]) col = false; }
+      if (row) rows.push(i); if (col) cols.push(i);
+    }
+    for (const i of rows) for (let j = 0; j < N; j++) ng[i*N+j] = 0;
+    for (const i of cols) for (let j = 0; j < N; j++) ng[j*N+i] = 0;
+    ng.cleared = rows.length + cols.length > 0;
+    return ng;
+  }
+  function dfs(g, left){
+    if (!g.includes(1)) return [];
+    if (!left.length || ++nodes > limit) return null;
+    const key = g.join('') + '|' + left.join(',');
+    if (seen.has(key)) return null;
+    seen.add(key);
+    const tried = new Set();
+    for (const i of left){
+      const p = hand[i], shape = JSON.stringify(p.cells);
+      if (tried.has(shape)) continue;          // identical pieces give identical results
+      tried.add(shape);
+      const rest = left.filter(x => x !== i);
+      for (let r = 0; r <= N - p.h; r++) for (let c = 0; c <= N - p.w; c++){
+        if (!fits(g, p, r, c)) continue;
+        const ng = drop(g, p, r, c);
+        if (clearingOnly && !ng.cleared) continue;   // quick pass: only moves that clear a line
+        const sol = dfs(ng, rest);
+        if (sol) return [{ i, r, c }, ...sol];
+      }
+    }
+    return null;
+  }
+  const left = []; hand.forEach((p, i) => { if (p) left.push(i); });
+  const sol = dfs(start, left);
+  return { sol, nodes };
+}
+// Quick pass first (only line-clearing moves, which is how every daily is built), then a full search
+function findSolution(grid, hand){
+  const quick = solvePuzzle(grid, hand, 60000, true);
+  if (quick.sol) return quick.sol;
+  return solvePuzzle(grid, hand, 50000, false).sol;
+}
+
 // ---------- Stats ----------
 function stats(){
   let st = {}; try { st = JSON.parse(store.get('bs-stats')) || {}; } catch {}
@@ -520,8 +583,9 @@ function bump(fn){ const st = stats(); fn(st); store.set('bs-stats', JSON.string
 
 // ---------- Daily ----------
 function dailyInfo(){ try { return JSON.parse(store.get('bs-daily')) || {}; } catch { return {}; } }
-const dailyDone = () => { const d = dailyInfo(); return d.day === today() && !!d.solved; };
+const dailyDone = () => { const d = dailyInfo(); return d.day === today() && (!!d.solved || !!d.gaveUp); };
 const triesText = n => n === 1 ? 'first try' : `in ${n} tries`;
+const hintsText = n => n ? ` with ${n} hint${n > 1 ? 's' : ''}` : '';
 const streakNow = () => { const d = dailyInfo(); return (d.lastDay === today() || d.lastDay === dayStr(-1)) ? (d.streak || 0) : 0; };
 
 const at = (r,c) => S.grid[r*N+c];
@@ -605,6 +669,7 @@ function render(){
   renderCombo();
   renderModeTag();
   document.body.classList.toggle('puzzle', modeOf() === 'daily');
+  document.body.classList.toggle('demo', !!S.demo);
   $('best').textContent = Math.max(best, S.score);
   [...$('meter').children].forEach((m, i) => { const on = i < S.meter; if (on !== m.classList.contains('f')) m.className = on ? 'm f' : 'm'; });
   const sb=$('smash');
@@ -619,7 +684,7 @@ function renderTray(){
   lastHandKey = key;
   ensureSlots(S.hand.length);
   slots.forEach((slot,i)=>{
-    slot.innerHTML=''; slot.classList.remove('dead','lifted','new');
+    slot.innerHTML=''; slot.classList.remove('dead','lifted','new','hinted');
     const p = S.hand[i]; if (!p) return;
     const sw = slot.clientWidth, sh = slot.clientHeight;
     const size = Math.min(g.size*0.62, (sw-8)/5, (sh-8)/5);
@@ -656,6 +721,8 @@ function renderModeTag(){
     const secs = Math.ceil((S.timeLeft ?? TIMED_MS) / 1000);
     el.textContent = `${Math.floor(secs/60)}:${pad2(secs % 60)}`;
     el.classList.toggle('urgent', secs <= 10 && !S.over);
+  } else if (m === 'daily' && S.demo){
+    el.textContent = 'SOLUTION'; el.classList.remove('urgent');
   } else if (m === 'daily'){
     const left = S.hand.filter(Boolean).length;
     el.textContent = `${left} piece${left === 1 ? '' : 's'} left`; el.classList.remove('urgent');
@@ -928,6 +995,7 @@ function loadSaved(mode){
 }
 // Picks up where you left off in that mode, or starts a new game. Returns false if there's nothing to play.
 function switchTo(mode){
+  if (mode === 'daily' && dailyDone()){ showDailyCard(); return false; }
   if (S && modeOf() === mode && !S.over && (mode !== 'daily' || (S.day === today() && S.pv === 1))){ render(); return true; }
   if (S) save();
   const saved = loadSaved(mode);
@@ -940,12 +1008,12 @@ function switchTo(mode){
 function showOv(html){ $('card').innerHTML = html; $('ov').classList.add('show'); }
 function hideOv(){ $('ov').classList.remove('show'); }
 function recordEnd(){
-  if (S.recorded) return;
+  if (S.recorded || S.demo) return;
   S.recorded = true;
   if (modeOf() !== 'daily') bump(st => { st.finished++; st.total += S.score; });
   else {
     const d = dailyInfo(), t = today();
-    if (d.day !== t){ d.day = t; d.tries = 0; d.solved = false; }
+    if (d.day !== t){ d.day = t; d.tries = 0; d.solved = false; d.hints = 0; }
     d.tries = (d.tries || 0) + 1;
     if (S.won && !d.solved){
       d.solved = true; d.solvedIn = d.tries; d.totalSolved = (d.totalSolved || 0) + 1;
@@ -980,10 +1048,17 @@ function showGameOver(){
   const isBest = S.score >= best && S.score > 0, mode = modeOf();
   if (mode === 'daily'){
     const d = dailyInfo();
-    if (S.won){
+    if (S.demo){
+      showOv(`<div class="label">Daily puzzle</div>
+        <h2>That's one way!</h2>
+        <p>There can be more than one solution. A new puzzle unlocks in ${untilMidnight()}.</p>
+        <button class="btn" id="again">Watch again</button>
+        <button class="btn alt" id="goHome">Home</button>`);
+      $('again').onclick = startDemo;
+    } else if (S.won){
       showOv(`<div class="label">★ Daily puzzle ★</div>
         <h2>Solved!</h2>
-        <p>${d.solvedIn ? 'Solved ' + triesText(d.solvedIn) : 'Solved again'} · ${streakNow()}-day streak</p>
+        <p>${d.solvedIn ? 'Solved ' + triesText(d.solvedIn) + hintsText(d.hints) : 'Solved again'} · ${streakNow()}-day streak</p>
         <p class="sub">New puzzle in ${untilMidnight()}</p>
         <button class="btn" id="shareBtn">Share</button>
         <button class="btn alt" id="goHome">Home</button>`);
@@ -995,11 +1070,13 @@ function showGameOver(){
         <p>${left ? `${left} piece${left > 1 ? 's' : ''} left with nowhere to go.` : 'Bricks are still on the board.'} Same puzzle — have another go.</p>
         <p class="sub">Try ${(d.tries || 0) + 1} · it's always solvable</p>
         <button class="btn" id="again">Try again</button>
+        <button class="btn alt" id="showSol">Show solution</button>
         <button class="btn alt" id="goHome">Home</button>`);
       $('again').onclick = () => newGame('daily');
+      $('showSol').onclick = giveUp;
     }
     $('goHome').onclick = () => { hideOv(); showHome(); };
-    if (S.won) SFX.best();
+    if (S.won && !S.demo) SFX.best();
     return;
   } else {
     const head = mode === 'timed' ? "Time's up" : 'Out of moves';
@@ -1031,7 +1108,7 @@ function untilMidnight(){
 }
 async function shareDaily(){
   const d = dailyInfo();
-  const text = `Block Smash daily puzzle ${d.day}: solved ${triesText(d.solvedIn || d.tries || 1)} (${streakNow()}-day streak)`;
+  const text = `Block Smash daily puzzle ${d.day}: solved ${triesText(d.solvedIn || d.tries || 1)}${hintsText(d.hints)} (${streakNow()}-day streak)`;
   try {
     if (navigator.share){ await navigator.share({ text }); return; }
     await navigator.clipboard.writeText(text);
@@ -1040,14 +1117,106 @@ async function shareDaily(){
 }
 function showDailyCard(){
   const d = dailyInfo();
+  if (!d.solved){
+    showOv(`<div class="label">Today's puzzle</div>
+      <h2>Solution revealed</h2>
+      <p>No streak today. A new puzzle unlocks in ${untilMidnight()}.</p>
+      <button class="btn" id="watchBtn">Watch again</button>
+      <button class="btn alt" id="dcDone">Close</button>`);
+    $('watchBtn').onclick = () => { startDemo(); leaveHome(); };
+    $('dcDone').onclick = hideOv;
+    return;
+  }
   showOv(`<div class="label">Today's puzzle</div>
     <h2>Solved!</h2>
-    <p>Solved ${triesText(d.solvedIn || 1)} · ${streakNow()}-day streak</p>
+    <p>Solved ${triesText(d.solvedIn || 1)}${hintsText(d.hints)} · ${streakNow()}-day streak</p>
     <p class="sub">New puzzle in ${untilMidnight()}.</p>
     <button class="btn" id="shareBtn">Share</button>
     <button class="btn alt" id="dcDone">Close</button>`);
   $('shareBtn').onclick = shareDaily; $('dcDone').onclick = hideOv;
 }
+// ---------- Give up: watch the solution ----------
+function giveUp(){
+  showOv(`<h2>Give up?</h2>
+    <p>You'll watch the solution, but today won't count toward your streak.</p>
+    <button class="btn" id="guYes">Show solution</button>
+    <button class="btn alt" id="guNo">Keep trying</button>`);
+  $('guYes').onclick = () => {
+    const d = dailyInfo(), t = today();
+    if (d.day !== t){ d.day = t; d.tries = 0; d.solved = false; d.hints = 0; }
+    d.gaveUp = true; store.set('bs-daily', JSON.stringify(d));
+    store.set(saveKey('daily'), '');   // the half-played puzzle can't be resumed after this
+    startDemo();
+  };
+  $('guNo').onclick = hideOv;
+}
+$('giveUpBtn').onclick = giveUp;
+
+// ---------- Hints: the next move that still leads to a clear board, from where you are now ----------
+function clearHint(){ cellEls.forEach(el => el.classList.remove('hintcell')); slots.forEach(sl => sl.classList.remove('hinted')); }
+function showHint(){
+  if (!S || S.over || S.demo || modeOf() !== 'daily') return;
+  clearHint(); hint('Thinking…');
+  setTimeout(() => {
+    const sol = findSolution(S.grid, S.hand);
+    hint('');
+    if (!sol){ toast('NO WAY OUT', 'restart and try again', '', 'g'); SFX.deny(); return; }
+    const { i, r, c } = sol[0], p = S.hand[i];
+    p.cells.forEach(([dr, dc]) => { const el = cellEls[(r+dr)*N + c+dc]; el.classList.add('hintcell'); el.style.setProperty('--col', p.color); });
+    if (slots[i]) slots[i].classList.add('hinted');
+    const d = dailyInfo(), t = today();
+    if (d.day !== t){ d.day = t; d.tries = 0; d.solved = false; d.hints = 0; }
+    d.hints = (d.hints || 0) + 1; store.set('bs-daily', JSON.stringify(d));
+    SFX.ready();
+  }, 40);
+}
+$('hintBtn').onclick = showHint;
+const wait = ms => new Promise(r => setTimeout(r, ms));
+let demoRun = 0;
+function startDemo(){
+  hideOv(); clearToasts();
+  if (drag){ cancelAnimationFrame(drag.raf); drag = null; floatEl.style.display = 'none'; }
+  S = fresh('daily'); S.demo = true; loadBest(); shownScore = 0; smashArmed = false; hint('');
+  render();
+  toast('SOLUTION', 'watch closely', '', 'g');
+  runDemo(++demoRun);
+}
+async function runDemo(run){
+  const pz = makePuzzle(S.day, S.theme);
+  await wait(1300);
+  for (let k = 0; k < pz.pieces.length; k++){
+    if (run !== demoRun || !S.demo || S.over) return;
+    const m = pz.pieces[k];
+    const r = Math.floor(m.at[0] / N) - m.cells[0][0], c = m.at[0] % N - m.cells[0][1];
+    await flyPiece(k, r, c);
+    if (run !== demoRun || !S.demo) return;
+    place(k, r, c);
+    await wait(650);
+  }
+}
+// Lifts a piece out of the tray and glides it onto the board
+function flyPiece(i, r, c){
+  return new Promise(done => {
+    const p = S.hand[i], g = boardGeom(), slot = slots[i], pieceEl = slot && slot.querySelector('.piece');
+    if (!p || !pieceEl){ done(); return; }
+    floatEl.innerHTML = '';
+    for (const [dr, dc] of p.cells){
+      const b = document.createElement('div'); b.className = 'blk';
+      b.style.cssText = `--col:${p.color};width:${g.size}px;height:${g.size}px;left:${dc*g.pitch}px;top:${dr*g.pitch}px`;
+      floatEl.appendChild(b);
+    }
+    const w = p.w*g.pitch - (g.pitch - g.size), h = p.h*g.pitch - (g.pitch - g.size), pr = pieceEl.getBoundingClientRect();
+    floatEl.style.transition = 'none'; floatEl.style.transformOrigin = '50% 50%';
+    setFloat(pr.left + pr.width/2 - w/2, pr.top + pr.height/2 - h/2, pr.width / w);
+    floatEl.style.display = 'block'; slot.classList.add('lifted'); SFX.pick();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      floatEl.style.transition = 'transform .6s cubic-bezier(.3,.8,.3,1)';
+      setFloat(g.x + c*g.pitch, g.y + r*g.pitch, 1);
+    }));
+    setTimeout(() => { floatEl.style.display = 'none'; done(); }, 650);
+  });
+}
+
 function showStats(){
   const st = stats(), d = dailyInfo();
   const tile = (v, label) => `<div class="stat"><b>${v}</b><span>${label}</span></div>`;
@@ -1123,14 +1292,15 @@ function inProgress(){ return S && !S.over && (S.score > 0 || S.grid.some(Boolea
 const played = st => !!st && (st.score > 0 || st.grid.some(Boolean));
 const classicInProgress = () => modeOf() === 'classic' ? inProgress() : played(loadSaved('classic'));
 function showHome(){
+  if (S && S.demo){ S.demo = false; S = loadSaved('classic') || (() => { const f = fresh(); f.hand = dealHand(); return f; })(); loadBest(); shownScore = S.score; clearToasts(); render(); }
   if (S) save();
   $('homeBest').textContent = +store.get('bs-best') || 0;
   $('playLabel').textContent = classicInProgress() ? 'CONTINUE' : 'PLAY';
   $('newBtn').style.display = classicInProgress() ? '' : 'none';
   const streak = streakNow();
-  $('dailyBtn').classList.toggle('done', dailyDone());
   const di = dailyInfo(), triedToday = di.day === today() && di.tries > 0;
-  $('dailySub').textContent = dailyDone() ? `${streak}-day streak` : (played(loadSaved('daily')) || triedToday ? 'Keep trying' : (streak ? `${streak}-day streak` : 'Puzzle of the day'));
+  $('dailyBtn').classList.toggle('done', dailyDone() && !!di.solved);
+  $('dailySub').textContent = dailyDone() ? (di.solved ? `${streak}-day streak` : 'Revealed') : (played(loadSaved('daily')) || triedToday ? 'Keep trying' : (streak ? `${streak}-day streak` : 'Puzzle of the day'));
   const tb = +store.get(bestKey('timed')) || 0;
   $('timedSub').textContent = played(loadSaved('timed')) ? 'Continue' : (tb ? `Best ${tb}` : '2 minutes');
   $('zenSub').textContent = played(loadSaved('zen')) ? 'Continue' : 'No game over';
@@ -1187,7 +1357,7 @@ function showHelp(){
       <li>Fill a row or column to clear it. Keep clearing for combos.</li>
       <li>Every line charges your <b style="color:var(--yellow)">SMASH</b>. At ${SMASH_MAX} lines, blow up any 2×2 area.</li>
       <li>Game ends when nothing fits and your smash isn't charged.</li>
-      <li><b>Daily puzzle:</b> clear the whole board using only the pieces you're given. One wrong move and you're stuck — retry as often as you like. Solve it every day to build a streak.</li>
+      <li><b>Daily puzzle:</b> clear the whole board using only the pieces you're given. One wrong move and you're stuck — retry as often as you like, ask for a hint, or give up and watch the solution. Solve it every day to build a streak.</li>
       <li><b>Timed:</b> score as much as you can in 2 minutes.</li>
       <li><b>Zen:</b> no game over. When you're stuck the hand reshuffles.</li>
     </ul>
@@ -1251,7 +1421,7 @@ const SNAP = 0.8;    // how far (in cells) a drop can be from a fitting spot and
 const setFloat = (x, y, k) => { floatEl.style.transform = `translate3d(${x}px,${y}px,0) scale(${k})`; };
 
 trayEl.addEventListener('pointerdown', e => {
-  if (smashArmed || S.over || busy || drag) return;
+  if (smashArmed || S.over || busy || drag || S.demo) return;
   const slot = e.target.closest('.slot'); if (!slot) return;
   const i = +slot.dataset.i, p = S.hand[i]; if (!p) return;
   const g = boardGeom(), gap = g.pitch - g.size;
@@ -1374,7 +1544,7 @@ showHome();
 
 // ---------- Updates ----------
 // Bump VERSION and version.json together on every release.
-const VERSION = '3.1';
+const VERSION = '3.3';
 $('ver').textContent = 'v' + VERSION;
 // Wipes the offline copy (never your scores) and reloads the latest version
 async function forceUpdate(){
