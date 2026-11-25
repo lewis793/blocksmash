@@ -13,11 +13,13 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Block Smash</title>
 <style>
+@font-face{font-family:"Lilita One";src:url(fonts/lilita-one.woff2) format("woff2");font-display:swap}
 :root{
   --ink:#1d1b2b;--text:#fff;--muted:rgba(255,255,255,.75);
   --yellow:#ffc52e;--yellow-dk:#b7800a;--red:#ff4d5e;--red-dk:#a3182a;
   --gap:5px;
-  --font:"Arial Rounded MT Bold",ui-rounded,"SF Pro Rounded","Nunito","Segoe UI Rounded",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font:"Lilita One","Arial Rounded MT Bold",ui-rounded,"SF Pro Rounded","Nunito","Segoe UI Rounded",system-ui,sans-serif;
 }
 /* ---------- Toy sets: each has its own surface, tray and rim ---------- */
 body,body[data-theme="brick"]{
@@ -43,7 +45,7 @@ body[data-theme="ice"]{
   --tray:#0a1d31;--rim:#d8f0ff;--rim-dk:#8fb8d6;--panel:#1d4b73;--panel-dk:#0d2742}
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;color:var(--text);font-family:var(--font);background:#1b1b24;
+html,body{height:100%;color:var(--text);font-family:var(--font);font-synthesis:none;letter-spacing:.01em;background:#1b1b24;
   overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:none}
 body{background:var(--surface)}
 #app{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
@@ -209,10 +211,10 @@ body[data-theme="ice"] :is(.f,.blk,.burst)::after{left:-10%;top:42%;width:120%;h
   box-shadow:0 8px 0 var(--panel-dk),0 22px 40px rgba(0,0,0,.4);animation:cardin .35s cubic-bezier(.3,1.5,.5,1)}
 @keyframes cardin{0%{transform:scale(.7);opacity:0}100%{transform:none;opacity:1}}
 .card h2{font-size:32px;font-weight:900;margin-bottom:6px;-webkit-text-stroke:6px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink)}
-.card p{color:var(--muted);font-size:15px;line-height:1.45;margin:8px 0;font-weight:700}
+.card p{color:var(--muted);font-size:15px;line-height:1.45;margin:8px 0;font-weight:600;font-family:var(--body)}
 .card .label{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);font-weight:900}
 .card .big{font-size:66px;font-weight:900;margin:2px 0;-webkit-text-stroke:8px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink)}
-.card ul{text-align:left;color:#fff;font-size:15px;line-height:1.5;margin:12px 0 6px 18px;font-weight:700}
+.card ul{text-align:left;color:#fff;font-size:15px;line-height:1.5;margin:12px 0 6px 18px;font-weight:600;font-family:var(--body)}
 .card li{margin:4px 0}
 .btn{border:0;border-radius:16px;padding:15px 20px;font:900 18px var(--font);margin-top:16px;width:100%;
   color:#3a2400;background:var(--yellow);box-shadow:0 6px 0 var(--yellow-dk)}
@@ -231,7 +233,7 @@ body[data-theme="ice"] :is(.f,.blk,.burst)::after{left:-10%;top:42%;width:120%;h
 #home.show{display:grid}
 #home.leave{animation:homeout .3s ease-in forwards}
 @keyframes homeout{to{opacity:0;transform:scale(1.06)}}
-.hwrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:22px;padding:24px 16px 120px;text-align:center}
+.hwrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:18px;padding:20px 16px 96px;text-align:center}
 /* The logo is built from bricks */
 #logo{--px:min(calc((100vw - 76px) / 25),17px);--pad:calc(var(--px) * .9);position:relative;
   width:calc(var(--px) * 25 + var(--pad) * 2);height:calc(var(--px) * 11.3 + var(--pad) * 2);border-radius:20px;background:var(--tray);
@@ -266,7 +268,27 @@ body[data-theme="ice"] :is(.f,.blk,.burst)::after{left:-10%;top:42%;width:120%;h
 .linkbtn{border:0;background:var(--panel);color:#fff;font:800 15px var(--font);padding:11px 16px;border-radius:14px;
   box-shadow:0 5px 0 var(--panel-dk)}
 .linkbtn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--panel-dk)}
-#ver{color:var(--muted);font-weight:700;font-size:12px}
+#ver{color:var(--muted);font-weight:600;font-size:12px;font-family:var(--body)}
+.modes{display:flex;gap:10px;animation:fadeup .45s 1.45s both}
+.modebtn{border:0;min-width:98px;padding:10px 12px 9px;border-radius:16px;background:var(--panel);color:#fff;
+  box-shadow:0 5px 0 var(--panel-dk);display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--font)}
+.modebtn b{font-size:20px;font-weight:400}
+.modebtn span{font:600 11px var(--body);color:var(--muted);white-space:nowrap}
+.modebtn.done b::after{content:" \2713";color:#2bb34a}
+.modebtn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--panel-dk)}
+#modeTag{font-size:18px;padding:6px 12px;border-radius:12px;background:var(--panel);box-shadow:0 4px 0 var(--panel-dk);
+  font-variant-numeric:tabular-nums;min-width:64px;text-align:center}
+#modeTag:empty{visibility:hidden}
+#modeTag.urgent{background:var(--red);box-shadow:0 4px 0 var(--red-dk);animation:throb .5s infinite alternate}
+.card{max-height:calc(100dvh - 48px);overflow:auto}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 14px}
+.stat{background:var(--panel-dk);border-radius:14px;padding:10px 8px}
+.stat b{display:block;font-size:26px;font-weight:400;color:var(--yellow)}
+.stat span{font:600 11px var(--body);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.sets{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+.set{padding:6px 10px;border-radius:10px;background:var(--panel-dk);font-size:14px}
+.set.off{opacity:.35}
+.card .sub{font:600 13px var(--body);color:var(--muted);margin-top:4px}
 </style>
 </head>
 <body>
@@ -276,6 +298,7 @@ body[data-theme="ice"] :is(.f,.blk,.burst)::after{left:-10%;top:42%;width:120%;h
       <svg viewBox="0 0 24 24"><path fill="#ffc83d" stroke="#a85d00" stroke-width="1.5" stroke-linejoin="round" d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>
       <span id="best">0</span>
     </div>
+    <div id="modeTag"></div>
     <div class="row">
       <button class="iconbtn" id="homeBtn" aria-label="Home"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3.2 2.5 11h2.7v9h5.3v-6h3v6h5.3v-9h2.7z"/></svg></button>
       <button class="iconbtn" id="restartBtn" aria-label="New game">↻</button>
@@ -303,9 +326,15 @@ body[data-theme="ice"] :is(.f,.blk,.burst)::after{left:-10%;top:42%;width:120%;h
       <span class="lbl">BEST</span><b id="homeBest">0</b>
     </div>
     <button class="playbtn" id="playBtn"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg><span id="playLabel">PLAY</span></button>
+    <div class="modes">
+      <button class="modebtn" id="dailyBtn"><b>Daily</b><span id="dailySub">New deal every day</span></button>
+      <button class="modebtn" id="timedBtn"><b>Timed</b><span id="timedSub">2 minutes</span></button>
+      <button class="modebtn" id="zenBtn"><b>Zen</b><span id="zenSub">No game over</span></button>
+    </div>
     <div class="links">
       <button class="linkbtn" id="newBtn">New game</button>
       <button class="linkbtn" id="howBtn">How to play</button>
+      <button class="linkbtn" id="statsBtn">Stats</button>
       <button class="linkbtn" id="setBtn">Settings</button>
     </div>
     <button class="linkbtn" id="updBtn" style="display:none">Update available — tap to update</button>
@@ -356,11 +385,21 @@ const TOTAL_W = SHAPES.reduce((a,s)=>a+s.w,0);
 // Uniform randomness from the OS. It never looks at your score, your history, or anything else.
 const rand = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
 const pick = arr => arr[Math.floor(rand()*arr.length)];
+// The daily uses a seeded generator (state saved in S.seed) so everyone gets the same deal that day.
+// Every other mode uses the OS randomness above.
+function drand(){
+  if (typeof S === 'undefined' || !S || S.seed == null) return rand();
+  let t = (S.seed = (S.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+const dpick = arr => arr[Math.floor(drand()*arr.length)];
 function randomPiece(){
-  let x = rand()*TOTAL_W, shape = SHAPES[0];
+  let x = drand()*TOTAL_W, shape = SHAPES[0];
   for (const s of SHAPES){ if ((x -= s.w) < 0){ shape = s; break; } }
-  const cells = pick(shape.orients);
-  return { cells, h: Math.max(...cells.map(p=>p[0]))+1, w: Math.max(...cells.map(p=>p[1]))+1, color: pick(themeColors()) };
+  const cells = dpick(shape.orients);
+  return { cells, h: Math.max(...cells.map(p=>p[0]))+1, w: Math.max(...cells.map(p=>p[1]))+1, color: dpick(themeColors()) };
 }
 // Fair-hand rule: re-deal (randomly) until every piece fits somewhere on the board.
 // It never chooses pieces to help or hurt you. If no fair hand turns up, you get a random one.
@@ -375,13 +414,47 @@ function dealHand(){
 
 // ---------- State ----------
 let S;
-function fresh(){ return { grid: Array(N*N).fill(null), hand: null, score: 0, meter: 0, combo: 0, since: 0, over: false, startBest: best, nb: false, theme: nextTheme(store.get('bs-theme')) }; }
+const MODES = { classic:{ name:'Classic' }, daily:{ name:'Daily' }, timed:{ name:'Timed' }, zen:{ name:'Zen' } };
+const TIMED_MS = 120000;
+const saveKey = m => m === 'classic' ? 'bs-state' : 'bs-state-' + m;
+const bestKey = m => m === 'classic' ? 'bs-best' : 'bs-best-' + m;
+const modeOf = () => (S && S.mode) || 'classic';
+const pad2 = n => String(n).padStart(2, '0');
+const dayStr = (offset = 0) => { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; };
+const today = () => dayStr(0);
+function hashStr(str){ let h = 2166136261; for (const ch of str){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h | 0; }
+function fresh(mode = 'classic'){
+  const st = { mode, grid: Array(N*N).fill(null), hand: null, score: 0, meter: 0, combo: 0, since: 0, over: false,
+    startBest: +store.get(bestKey(mode)) || 0, nb: false, theme: nextTheme(store.get('bs-theme')) };
+  if (mode === 'daily'){
+    st.day = today(); st.seed = hashStr('blocksmash/' + st.day);
+    const keys = Object.keys(THEMES); st.theme = keys[(st.seed >>> 0) % keys.length];
+  }
+  if (mode === 'timed') st.timeLeft = TIMED_MS;
+  return st;
+}
 const store = {
   get(k){ try { return localStorage.getItem(k); } catch { return null; } },
   set(k,v){ try { localStorage.setItem(k,v); } catch {} },
 };
 let best = +store.get('bs-best') || 0;
-function save(){ store.set('bs-state', JSON.stringify(S)); if (S.score > best){ best = S.score; store.set('bs-best', best); } }
+function loadBest(){ best = +store.get(bestKey(modeOf())) || 0; }
+function save(){
+  store.set(saveKey(modeOf()), JSON.stringify(S));
+  if (S.score > best){ best = S.score; store.set(bestKey(modeOf()), best); }
+}
+
+// ---------- Stats ----------
+function stats(){
+  let st = {}; try { st = JSON.parse(store.get('bs-stats')) || {}; } catch {}
+  return Object.assign({ started:0, finished:0, total:0, lines:0, allClears:0, bestCombo:0, smashes:0, sets:{}, modes:{} }, st);
+}
+function bump(fn){ const st = stats(); fn(st); store.set('bs-stats', JSON.stringify(st)); }
+
+// ---------- Daily ----------
+function dailyInfo(){ try { return JSON.parse(store.get('bs-daily')) || {}; } catch { return {}; } }
+const dailyDone = () => { const d = dailyInfo(); return d.day === today() && d.done; };
+const streakNow = () => { const d = dailyInfo(); return (d.lastDay === today() || d.lastDay === dayStr(-1)) ? (d.streak || 0) : 0; };
 
 const at = (r,c) => S.grid[r*N+c];
 function canPlace(p, r, c){
@@ -458,6 +531,8 @@ function render(){
   });
   animateScore();
   renderCombo();
+  renderModeTag();
+  $('restartBtn').style.display = modeOf() === 'daily' ? 'none' : '';
   $('best').textContent = Math.max(best, S.score);
   [...$('meter').children].forEach((m, i) => { const on = i < S.meter; if (on !== m.classList.contains('f')) m.className = on ? 'm f' : 'm'; });
   const sb=$('smash');
@@ -502,6 +577,14 @@ function toast(word, pts, combo, tier){
 function laterToast(delay, ...args){ toastTimers.push(setTimeout(() => toast(...args), delay)); }
 function clearToasts(){ toastTimers.forEach(clearTimeout); toastTimers = []; }
 let lastCombo = 0;
+function renderModeTag(){
+  const el = $('modeTag'), m = modeOf();
+  if (m === 'timed'){
+    const secs = Math.ceil((S.timeLeft ?? TIMED_MS) / 1000);
+    el.textContent = `${Math.floor(secs/60)}:${pad2(secs % 60)}`;
+    el.classList.toggle('urgent', secs <= 10 && !S.over);
+  } else { el.textContent = m === 'classic' ? '' : MODES[m].name.toUpperCase(); el.classList.remove('urgent'); }
+}
 function renderCombo(){
   const el = $('comboPill');
   if (S.combo >= 2){
@@ -514,15 +597,17 @@ function renderCombo(){
 // ---------- Sound ----------
 // All sounds are generated in code (Web Audio), so nothing to download and it works offline.
 const soundOn = () => store.get('bs-sound') !== 'off';
+const musicOn = () => store.get('bs-music') === 'on';   // music starts off
 const SFX = (() => {
   let ctx = null, master = null, noiseBuf = null;
   function init(){
-    if (!soundOn()) return;
-    if (ctx){ if (ctx.state === 'suspended') ctx.resume(); return; }
+    if (!soundOn() && !musicOn()) return;
+    if (ctx){ if (ctx.state === 'suspended') ctx.resume(); musicSync(); return; }
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     ctx = new AC(); master = ctx.createGain(); master.gain.value = .55; master.connect(ctx.destination);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate * .6, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random()*2 - 1;
+    musicSync();
   }
   function tone(freq, t0, dur, o = {}){
     const osc = ctx.createOscillator(), g = ctx.createGain();
@@ -539,6 +624,35 @@ const SFX = (() => {
     src.connect(f); f.connect(g); g.connect(master); src.start(t0); src.stop(t0 + dur);
   }
   const semi = (f, n) => f * Math.pow(2, n/12);
+  // ---------- Music: a little looping tune, generated as it plays ----------
+  let mGain = null, mTimer = null, mNext = 0, mStep = 0;
+  const STEP = 60 / 112 / 2;                               // eighth notes at 112 bpm
+  const PROG = [[0,4,7], [-3,0,4], [-7,-3,0], [-5,-1,2]];   // C  Am  F  G
+  const ARP  = [0,1,2,1, 0,2,1,2];
+  const MEL  = [[12,null,7,null,9,null,7,4], [5,null,4,null,2,null,4,null], [0,null,2,4,5,null,4,2], [2,null,null,4,7,null,null,null]];
+  function mNote(freq, t0, dur, type, vol){
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(vol, t0 + .01); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+    o.connect(g); g.connect(mGain); o.start(t0); o.stop(t0 + dur + .02);
+  }
+  function schedule(){
+    while (mNext < ctx.currentTime + .3){
+      const bar = Math.floor(mStep / 8) % 4, i = mStep % 8, chord = PROG[bar];
+      if (i % 4 === 0) mNote(semi(130.81, chord[0]), mNext, STEP*3.6, 'triangle', .13);
+      mNote(semi(523.25, chord[ARP[i]] + (i >= 4 ? 12 : 0)), mNext, STEP*.8, 'square', .018);
+      const m = MEL[(Math.floor(mStep / 32) % 2) ? (bar + 2) % 4 : bar][i];
+      if (m != null) mNote(semi(523.25, m), mNext, STEP*1.8, 'triangle', .05);
+      mNext += STEP; mStep++;
+    }
+  }
+  function musicSync(){
+    const want = musicOn() && ctx && !document.hidden;
+    if (want && !mTimer){
+      if (!mGain){ mGain = ctx.createGain(); mGain.gain.value = .6; mGain.connect(master); }
+      mNext = ctx.currentTime + .1; mTimer = setInterval(schedule, 100); schedule();
+    } else if (!want && mTimer){ clearInterval(mTimer); mTimer = null; }
+  }
   const play = fn => { if (!soundOn()) return; init(); if (!ctx) return; try { fn(ctx.currentTime); } catch {} };
   return {
     init,
@@ -560,8 +674,13 @@ const SFX = (() => {
     over:  () => play(t => [0,-3,-7,-12].forEach((n, i) => tone(semi(392, n), t + i*.17, .42, {type:'triangle', vol:.16}))),
     tap:   () => play(t => tone(760, t, .035, {type:'triangle', vol:.1})),
     count: () => play(t => tone(1200, t, .03, {type:'square', vol:.03})),
+    tick:  () => play(t => tone(1000, t, .05, {type:'square', vol:.05})),
+    shuffle: () => play(t => [0,5,10].forEach((n, i) => tone(semi(440, n), t + i*.04, .12, {type:'triangle', vol:.1}))),
+    musicSync,
   };
+
 })();
+document.addEventListener('visibilitychange', () => { SFX.musicSync(); if (document.hidden && typeof S !== 'undefined' && S) save(); });
 // Browsers only allow sound after a tap, so wake the audio on every touch
 document.addEventListener('pointerdown', () => SFX.init(), true);
 document.addEventListener('click', e => { if (e.target.closest('button')) SFX.tap(); }, true);
@@ -574,6 +693,7 @@ function buzz(p){ if (!vibeOn()) return; try { if (navigator.vibrate) navigator.
 
 // ---------- Game flow ----------
 function place(i, r, c){
+  if (S.over) return;
   const p = S.hand[i], before = S.score;
   for (const [dr,dc] of p.cells) S.grid[(r+dr)*N + c+dc] = p.color;
   S.score += p.cells.length;
@@ -585,6 +705,7 @@ function place(i, r, c){
   if (lines){
     clearToasts();
     S.combo++; S.since = 0;
+    bump(st => { st.lines += lines; st.bestCombo = Math.max(st.bestCombo, S.combo); });
     let pts = Math.round(10 * lines*(lines+1)/2 * (1 + (S.combo-1)*0.5));
     const wasReady = S.meter >= SMASH_MAX;
     S.meter = Math.min(SMASH_MAX, S.meter + lines);
@@ -594,6 +715,7 @@ function place(i, r, c){
       pts += 300;
       // Clearing the board earns a new block style; pieces still in hand switch over too
       S.theme = nextTheme(S.theme);
+      bump(st => { st.allClears++; st.sets[S.theme] = (st.sets[S.theme] || 0) + 1; });
       S.hand.forEach(h => { if (h) h.color = pick(themeColors()); });
     }
     S.score += pts;
@@ -666,13 +788,28 @@ function afterMove(cleared, info){
   const anyFit = S.hand.some(p => p && fitsAnywhere(p));
   if (!anyFit){
     if (S.meter >= SMASH_MAX) hint('Out of moves — use your SMASH!');
-    else S.over = true;
+    else if (modeOf() === 'zen') cleared = (cleared || []).concat(zenShuffle());
+    else { S.over = true; recordEnd(); }
   }
   save(); render();
   for (const idx of info.landed || []) cellEls[idx].classList.add('land');
   effects(cleared, info);
   if (info.gained) pointsPop(info.origin, info.gained);
   if (S.over) setTimeout(gameOverSequence, cleared && cleared.length ? 900 : 300);
+}
+
+// Zen: deal a fresh hand, and knock random bricks loose until something fits
+function zenShuffle(){
+  const removed = [];
+  S.hand = dealHand();
+  while (!S.hand.some(p => p && fitsAnywhere(p))){
+    const filled = []; S.grid.forEach((v, i) => { if (v) filled.push(i); });
+    if (!filled.length) break;
+    const i = filled[Math.floor(rand()*filled.length)];
+    removed.push([i, S.grid[i]]); S.grid[i] = null;
+  }
+  toast('SHUFFLE!', '', '', 1); SFX.shuffle();
+  return removed;
 }
 
 // Smash clears a 2x2 area; r0,c0 is its top-left cell.
@@ -684,38 +821,87 @@ function smashAt(r0, c0){
   }
   S.score += cleared.length * 5;
   S.meter = 0; smashArmed = false;
+  bump(st => st.smashes++);
   shake(); buzz(70); SFX.smash();
   toast('SMASH!', cleared.length ? `+${cleared.length*5}` : '');
   afterMove(cleared.length ? cleared : [[r0*N+c0, '#ffc83d']], { origin: [r0+0.5, c0+0.5], ring: true });
 }
 
-function newGame(){
+function newGame(mode = modeOf()){
   clearToasts();
-  S = fresh(); S.hand = dealHand(); smashArmed=false; shownScore = 0;
-  laterToast(450, THEMES[S.theme].name.toUpperCase(), 'new set', '', 1);
+  S = fresh(mode); loadBest(); S.hand = dealHand(); smashArmed=false; shownScore = 0;
+  laterToast(450, mode === 'classic' ? THEMES[S.theme].name.toUpperCase() : MODES[mode].name.toUpperCase(),
+             mode === 'classic' ? 'new set' : THEMES[S.theme].name + ' set', '', 1);
+  bump(st => { st.started++; st.modes[mode] = (st.modes[mode] || 0) + 1; st.sets[S.theme] = (st.sets[S.theme] || 0) + 1; });
   save(); hint(''); render(); hideOv();
+}
+// A saved, unfinished game for this mode (today's only, for the daily)
+function loadSaved(mode){
+  try {
+    const st = JSON.parse(store.get(saveKey(mode)));
+    if (st && st.grid && st.grid.length === N*N && st.hand && !st.over && (mode !== 'daily' || st.day === today())){
+      st.mode = mode; return st;
+    }
+  } catch {}
+  return null;
+}
+// Picks up where you left off in that mode, or starts a new game. Returns false if there's nothing to play.
+function switchTo(mode){
+  if (S && modeOf() === mode && !S.over && (mode !== 'daily' || S.day === today())){ render(); return true; }
+  if (S) save();
+  const saved = loadSaved(mode);
+  if (saved){ clearToasts(); S = saved; loadBest(); smashArmed = false; shownScore = S.score; hint(''); render(); return true; }
+  if (mode === 'daily' && dailyDone()){ showDailyCard(); return false; }
+  newGame(mode); return true;
 }
 
 // ---------- Overlay ----------
 function showOv(html){ $('card').innerHTML = html; $('ov').classList.add('show'); }
 function hideOv(){ $('ov').classList.remove('show'); }
-function gameOverSequence(){
-  if (!S.over || homeEl.classList.contains('show')) return;
+function recordEnd(){
+  if (S.recorded) return;
+  S.recorded = true;
+  bump(st => { st.finished++; st.total += S.score; });
+  if (modeOf() === 'daily'){
+    const d = dailyInfo(), t = today();
+    d.streak = d.lastDay === t ? (d.streak || 1) : (d.lastDay === dayStr(-1) ? (d.streak || 0) + 1 : 1);
+    d.bestStreak = Math.max(d.bestStreak || 0, d.streak);
+    d.lastDay = t; d.day = t; d.score = S.score; d.done = true; d.best = Math.max(d.best || 0, S.score);
+    store.set('bs-daily', JSON.stringify(d));
+  }
+  save();
+}
+function gameOverSequence(msg = 'OUT OF MOVES'){
+  if (!S.over) return;
+  recordEnd();
+  if (homeEl.classList.contains('show')) return;
   SFX.over(); buzz([40, 60, 40]);
   // the board greys out from the bottom row up
   cellEls.forEach((el, i) => { el.style.animationDelay = ((N - 1 - Math.floor(i/N)) * 70) + 'ms'; el.classList.add('greyed'); });
-  toast('OUT OF MOVES', '', '', 'g');
+  toast(msg, '', '', 'g');
   setTimeout(showGameOver, 1500);
 }
 function showGameOver(){
   if (!S.over || homeEl.classList.contains('show')) return;
-  const isBest = S.score >= best && S.score > 0;
-  showOv(`<div class="label">${isBest ? '★ New best ★' : 'Out of moves'}</div>
-    <div class="big" id="goScore">0</div>
-    <p>Best: ${best}</p>
-    <button class="btn" id="again">Play again</button>
-    <button class="btn alt" id="goHome">Home</button>`);
-  $('again').onclick = newGame;
+  const isBest = S.score >= best && S.score > 0, mode = modeOf();
+  if (mode === 'daily'){
+    const d = dailyInfo();
+    showOv(`<div class="label">${isBest ? '★ Best daily yet ★' : 'Daily complete'}</div>
+      <div class="big" id="goScore">0</div>
+      <p>${streakNow()}-day streak · best daily ${d.best || 0}</p>
+      <p class="sub">New deal in ${untilMidnight()}</p>
+      <button class="btn" id="shareBtn">Share</button>
+      <button class="btn alt" id="goHome">Home</button>`);
+    $('shareBtn').onclick = shareDaily;
+  } else {
+    const head = mode === 'timed' ? "Time's up" : 'Out of moves';
+    showOv(`<div class="label">${isBest ? '★ New best ★' : head}</div>
+      <div class="big" id="goScore">0</div>
+      <p>${MODES[mode].name} best: ${best}</p>
+      <button class="btn" id="again">Play again</button>
+      <button class="btn alt" id="goHome">Home</button>`);
+    $('again').onclick = () => newGame(mode);
+  }
   $('goHome').onclick = () => { hideOv(); showHome(); };
   // count the score up
   const end = S.score, t0 = performance.now(), dur = Math.min(1200, 300 + end * 2);
@@ -728,6 +914,48 @@ function showGameOver(){
     if (k < 1) requestAnimationFrame(step); else if (isBest) SFX.best();
   };
   requestAnimationFrame(step);
+}
+
+function untilMidnight(){
+  const now = new Date(), next = new Date(now); next.setHours(24, 0, 0, 0);
+  const mins = Math.ceil((next - now) / 60000);
+  return mins >= 60 ? `${Math.floor(mins/60)}h ${mins%60}m` : `${mins}m`;
+}
+async function shareDaily(){
+  const d = dailyInfo();
+  const text = `Block Smash daily ${d.day}: ${d.score} points (${streakNow()}-day streak)`;
+  try {
+    if (navigator.share){ await navigator.share({ text }); return; }
+    await navigator.clipboard.writeText(text);
+    $('shareBtn').textContent = 'Copied!';
+  } catch {}
+}
+function showDailyCard(){
+  const d = dailyInfo();
+  showOv(`<div class="label">Today's daily</div>
+    <div class="big">${d.score || 0}</div>
+    <p>${streakNow()}-day streak · best daily ${d.best || 0}</p>
+    <p class="sub">You've played today. New deal in ${untilMidnight()}.</p>
+    <button class="btn" id="shareBtn">Share</button>
+    <button class="btn alt" id="dcDone">Close</button>`);
+  $('shareBtn').onclick = shareDaily; $('dcDone').onclick = hideOv;
+}
+function showStats(){
+  const st = stats(), d = dailyInfo();
+  const tile = (v, label) => `<div class="stat"><b>${v}</b><span>${label}</span></div>`;
+  const bests = ['classic','timed','daily','zen'].map(m => tile(+store.get(bestKey(m)) || 0, `Best ${MODES[m].name}`)).join('');
+  showOv(`<h2>Stats</h2>
+    <div class="statgrid">
+      ${tile(st.started, 'Games played')}${tile(st.finished ? Math.round(st.total / st.finished) : 0, 'Average score')}
+      ${bests}
+      ${tile(st.lines, 'Lines cleared')}${tile(st.bestCombo ? 'x' + st.bestCombo : '–', 'Best combo')}
+      ${tile(st.allClears, 'All clears')}${tile(st.smashes, 'Smashes')}
+      ${tile(streakNow(), 'Daily streak')}${tile(d.bestStreak || 0, 'Best streak')}
+    </div>
+    <div class="label">Toy sets</div>
+    <div class="sets">${Object.keys(THEMES).map(k => `<span class="set ${st.sets[k] ? '' : 'off'}">${THEMES[k].name}${st.sets[k] ? ' · ' + st.sets[k] : ''}</span>`).join('')}</div>
+    <button class="btn" id="stDone">Done</button>`);
+  $('stDone').onclick = hideOv;
 }
 
 // ---------- Home ----------
@@ -782,10 +1010,20 @@ function paintHome(){
 }
 buildPile();
 function inProgress(){ return S && !S.over && (S.score > 0 || S.grid.some(Boolean)); }
+// Is there an unfinished classic game to continue?
+const played = st => !!st && (st.score > 0 || st.grid.some(Boolean));
+const classicInProgress = () => modeOf() === 'classic' ? inProgress() : played(loadSaved('classic'));
 function showHome(){
-  $('homeBest').textContent = Math.max(best, S ? S.score : 0);
-  $('playLabel').textContent = inProgress() ? 'CONTINUE' : 'PLAY';
-  $('newBtn').style.display = inProgress() ? '' : 'none';
+  if (S) save();
+  $('homeBest').textContent = +store.get('bs-best') || 0;
+  $('playLabel').textContent = classicInProgress() ? 'CONTINUE' : 'PLAY';
+  $('newBtn').style.display = classicInProgress() ? '' : 'none';
+  const streak = streakNow();
+  $('dailyBtn').classList.toggle('done', dailyDone());
+  $('dailySub').textContent = dailyDone() ? `${streak}-day streak` : (played(loadSaved('daily')) ? 'Continue' : (streak ? `${streak}-day streak` : 'New deal every day'));
+  const tb = +store.get(bestKey('timed')) || 0;
+  $('timedSub').textContent = played(loadSaved('timed')) ? 'Continue' : (tb ? `Best ${tb}` : '2 minutes');
+  $('zenSub').textContent = played(loadSaved('zen')) ? 'Continue' : 'No game over';
   homeEl.classList.remove('leave');
   homeEl.classList.add('show');
   buildLogo();
@@ -794,23 +1032,34 @@ function leaveHome(){
   homeEl.classList.add('leave');
   setTimeout(() => { homeEl.classList.remove('show','leave'); renderTray(); }, 330);
 }
-$('playBtn').onclick = () => {
-  if (!inProgress()) newGame();
+function play(mode){
+  if (!switchTo(mode)) return;
   leaveHome();
   if (!store.get('bs-seen')) setTimeout(showHelp, 360);
-};
-$('newBtn').onclick = () => { newGame(); leaveHome(); };
+}
+$('playBtn').onclick = () => play('classic');
+$('dailyBtn').onclick = () => play('daily');
+$('timedBtn').onclick = () => play('timed');
+$('zenBtn').onclick = () => play('zen');
+$('newBtn').onclick = () => { if (S) save(); newGame('classic'); leaveHome(); };
+$('statsBtn').onclick = showStats;
 $('howBtn').onclick = showHelp;
 function showSettings(){
   const row = (id, label, on) => `<button class="setrow" id="${id}"><span>${label}</span><span class="tog ${on ? 'on' : ''}"><i></i></span></button>`;
   showOv(`<h2>Settings</h2>
     ${row('soundTog', 'Sound', soundOn())}
+    ${row('musicTog', 'Music', musicOn())}
     ${row('vibeTog', 'Vibration', vibeOn())}
     <button class="btn" id="setDone">Done</button>`);
   $('soundTog').onclick = () => {
     store.set('bs-sound', soundOn() ? 'off' : 'on');
     $('soundTog').querySelector('.tog').classList.toggle('on', soundOn());
     SFX.tap();
+  };
+  $('musicTog').onclick = () => {
+    store.set('bs-music', musicOn() ? 'off' : 'on');
+    $('musicTog').querySelector('.tog').classList.toggle('on', musicOn());
+    SFX.init(); SFX.musicSync();
   };
   $('vibeTog').onclick = () => {
     store.set('bs-vibe', vibeOn() ? 'off' : 'on');
@@ -826,8 +1075,11 @@ function showHelp(){
     <ul>
       <li>Drag pieces onto the board.</li>
       <li>Fill a row or column to clear it. Keep clearing for combos.</li>
-      <li>Every line charges your <b style="color:var(--gold)">SMASH</b>. At ${SMASH_MAX} lines, blow up any 2×2 area.</li>
+      <li>Every line charges your <b style="color:var(--yellow)">SMASH</b>. At ${SMASH_MAX} lines, blow up any 2×2 area.</li>
       <li>Game ends when nothing fits and your smash isn't charged.</li>
+      <li><b>Daily:</b> one game a day, and everyone gets the same pieces. Keep your streak going.</li>
+      <li><b>Timed:</b> score as much as you can in 2 minutes.</li>
+      <li><b>Zen:</b> no game over. When you're stuck the hand reshuffles.</li>
     </ul>
     <p><b style="color:#fff">The honest dealer:</b> pieces are purely random. It only re-deals if a piece wouldn't fit anywhere. It never looks at your score. No ads, ever.</p>
     <button class="btn" id="ok">Let's go</button>`);
@@ -836,7 +1088,7 @@ function showHelp(){
 $('restartBtn').onclick = () => {
   showOv(`<h2>Start over?</h2><p>Your current score is ${S.score}.</p>
     <button class="btn" id="yes">New game</button><button class="btn alt" id="no">Keep playing</button>`);
-  $('yes').onclick = newGame; $('no').onclick = hideOv;
+  $('yes').onclick = () => newGame(modeOf()); $('no').onclick = hideOv;
 };
 
 // ---------- Smash ----------
@@ -975,12 +1227,31 @@ function endDrag(){
 
 window.addEventListener('resize', () => S && renderTray());
 
+// ---------- Timed mode clock ----------
+let clockLast = performance.now();
+setInterval(() => {
+  const now = performance.now(), dt = Math.min(now - clockLast, 500); clockLast = now;
+  if (!S || modeOf() !== 'timed' || S.over) return;
+  if (homeEl.classList.contains('show') || $('ov').classList.contains('show') || document.hidden) return;
+  const before = Math.ceil(S.timeLeft / 1000);
+  S.timeLeft = Math.max(0, S.timeLeft - dt);
+  const after = Math.ceil(S.timeLeft / 1000);
+  if (after !== before){ renderModeTag(); if (after <= 10 && after > 0) SFX.tick(); if (after % 5 === 0) save(); }
+  if (S.timeLeft <= 0){
+    if (drag){ cancelAnimationFrame(drag.raf); drag = null; floatEl.style.display = 'none'; }
+    S.over = true; smashArmed = false; clearMarks(); recordEnd(); render();
+    gameOverSequence("TIME'S UP!");
+  }
+}, 200);
+
 // ---------- Boot ----------
 try {
   const saved = JSON.parse(store.get('bs-state'));
   if (saved && saved.grid && saved.grid.length===N*N && saved.hand && !saved.over) S = saved;
 } catch {}
 if (!S) { S = fresh(); S.hand = dealHand(); }
+S.mode = S.mode || 'classic';
+loadBest();
 shownScore = S.score;
 render();
 afterMove();
@@ -990,7 +1261,7 @@ showHome();
 
 // ---------- Updates ----------
 // Bump VERSION and version.json together on every release.
-const VERSION = '2.2';
+const VERSION = '3.0';
 $('ver').textContent = 'v' + VERSION;
 // Wipes the offline copy (never your scores) and reloads the latest version
 async function forceUpdate(){

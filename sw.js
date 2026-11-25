@@ -1,6 +1,6 @@
 // Works offline: the page is fetched fresh when online (so updates arrive) and served from cache when not.
-const CACHE = 'blocksmash-v11';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
+const CACHE = 'blocksmash-v12';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './fonts/lilita-one.woff2'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
